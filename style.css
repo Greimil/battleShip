@@ -1,0 +1,476 @@
+/* ========================================================================== */
+/* Root Variables */
+:root {
+  --Primario: #1a1a2e;
+  --Secundario: #1e3a5f;
+  --ActionCTA: #e63946;
+  --ActionCTAHover: #bb2f3a;
+  --acento: #8b5cf6;
+  --acentoHover: #5e3ea8;
+  --primarioText: #f8f9fa;
+  --secundarioText: #a8b2d1;
+  --exito: #06d6a0;
+  --error: #ffd166;
+  --bgtransparent: rgba(255, 255, 255, 0.07);
+}
+
+/* ========================================================================== */
+/* Global Styles */
+* {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  color: var(--primarioText);
+}
+
+body {
+  background-color: var(--Primario);
+  height: 100%;
+  overflow: hidden;
+}
+
+html {
+  height: 100%;
+}
+
+/* ========================================================================== */
+/* Icon Styles */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+/* ========================================================================== */
+/* Navigation Styles */
+header nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 25px 25px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  height: 80px;
+}
+
+header nav ul {
+  display: flex;
+  text-decoration: none;
+  gap: 10px;
+  list-style: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+header nav ul li {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* ========================================================================== */
+/* Hero Section Styles */
+#heroSection {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  transition: opacity 1s ease;
+  opacity: 0;
+}
+
+#heroSection .maintext {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  flex: 1;
+  gap: 25px;
+  margin-top: -150px;
+}
+
+#heroSection .maintext h1 {
+  font-size: 48px;
+}
+
+#heroSection .maintext p {
+  color: var(--secundarioText);
+  font-size: 24px;
+}
+
+#heroSection .maintext button {
+  background-color: var(--ActionCTA);
+  padding: 15px 15px;
+  border-radius: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#heroSection .maintext button:hover {
+  background-color: var(--ActionCTAHover);
+  transition: all ease 0.3s;
+}
+
+/* ========================================================================== */
+/* Game Section Styles */
+#gameSection {
+  height: calc(100% - 80px);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+
+#gameSection .titles {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 10px;
+}
+
+#gameSection .titles p {
+  color: var(--secundarioText);
+}
+
+.tableContainer {
+  width: 65%;
+  display: flex;
+  /* flex-direction: column; */
+  align-items: center;
+  justify-content: end;
+}
+
+.intruccions {
+  position: absolute;
+  bottom: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#rotateHint {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  font-size: 1rem;
+  color: white;
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+  0%, 100% { color: var(--primarioText); }
+  50% { color: var(--secundarioText); }
+}
+
+#rotateHint.visible {
+  opacity: 1;
+}
+
+
+
+.optionsContainer {
+  width: 35%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+
+.placeSection {
+  height: calc(100% - 109px);
+  display: flex;
+  width: 100%;
+}
+
+/* ========================================================================== */
+/* Table Styles */
+
+#board {
+  position: relative;
+}
+
+.cellContainer {
+  border: 3px solid var(--acento);
+  display: grid;
+  grid-template-columns: repeat(10, 45px);
+  grid-template-rows: repeat(10, 45px);
+  border-collapse: collapse;
+  background-color: rgba(255, 255, 255, 0.07);
+  border-collapse: collapse;
+}
+
+.cell {
+  border-right: 1px solid white;
+  border-bottom: 1px solid white;
+  width: 45px;
+  height: 45px;
+  border-collapse: collapse;
+  position: relative;
+}
+
+.cell:nth-child(10n) {
+  border-right: none;
+}
+
+.cell:nth-last-child(-n + 10) {
+  border-bottom: none;
+}
+
+#board .rowHeader {
+  position: absolute;
+  left: -25px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+#board .colHeader {
+  position: absolute;
+  top: -25px;
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+}
+
+/* ========================================================================== */
+/* Fleet Styles */
+.fleet {
+  max-width: 350px;
+  width: 100%;
+  padding: 0px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+.ship {
+  display: flex;
+  background-color: var(--bgtransparent);
+  padding: 16px;
+  margin-top: 10px;
+  border-radius: 10px;
+  justify-content: space-between;
+  align-items: center;
+  cursor: grab;
+}
+
+.ship div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+
+.ship div span {
+  color: var(--secundarioText);
+  font-size: 14px;
+}
+
+.ship div strong {
+  font-weight: normal;
+}
+
+.ship img {
+  width: 100%;
+  max-width: 150px;
+}
+
+.fleet .optionsbutons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fleet .optionsbutons button {
+  padding: 20px;
+  color: black;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.fleet .optionsbutons button:first-child {
+  color: var(--acento);
+  background: #1a1a2e;
+  border: 1px solid var(--acento);
+  cursor: pointer;
+}
+.fleet .optionsbutons button:first-child:hover {
+  color: var(--primarioText);
+  transition: all ease 0.5s;
+}
+
+.fleet .optionsbutons button:last-child {
+  color: var(--primarioText);
+  background: var(--ActionCTA);
+  cursor: pointer;
+  transition: all ease 0.5s;
+}
+
+.fleet .optionsbutons button:last-child:hover {
+  background: var(--ActionCTAHover);
+}
+
+/* .shipInsidegrid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 190px;
+  z-index: 10;
+  max-height: 45px;
+} */
+
+
+.shipInsidegrid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 45px; /* una celda */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+ 
+   height: 100%;
+  width: 100%;
+  object-fit: contain; /* o cover si prefieres que llene completamente */
+  display: block;
+}
+
+/* Si quieres que se escale automáticamente según el número de celdas */
+.shipInsidegrid img {
+ 
+}
+
+
+
+/* ========================================================================== */
+/* Ocean and Wave Animation Styles */
+.ocean {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background: rgba(71, 137, 222, 0.558);
+}
+
+.wave {
+  background: url("/src/assets/wave.svg") repeat-x;
+  position: absolute;
+  top: -180px;
+  width: 6400px;
+  height: 180px;
+  animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+  transform: translate3d(0, 0, 0);
+}
+
+.wave:nth-of-type(2) {
+  top: -157px;
+  animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.125s infinite,
+    swell 7s ease -1.25s infinite;
+  opacity: 1;
+}
+
+/* ========================================================================== */
+/* Animations */
+@keyframes wave {
+  0% {
+    margin-left: 0;
+  }
+  100% {
+    margin-left: -1600px;
+  }
+}
+
+@keyframes swell {
+  0%,
+  100% {
+    transform: translate3d(0, -25px, 0);
+  }
+  50% {
+    transform: translate3d(0, 5px, 0);
+  }
+}
+
+/* ========================================================================== */
+/* Utility Classes */
+.activeScreen {
+  opacity: 1 !important;
+  pointer-events: all !important;
+}
+
+.rotateCursor {
+  cursor: url("./src/assets/Rotate_cursor.png"), auto;
+}
+
+.highlightSuccesCell {
+  background-color: var(--exito) !important;
+}
+
+.highlighErrorCell {
+  background-color: var(--error) !important;
+}
+
+/* 
+.rotateShip90{
+  transform: rotate(90deg);
+  transform-origin: top left;
+  left: 45px;
+
+}
+
+.rotateShip0 {
+  transform-origin: top left;
+  rotate: 0deg;
+} */
+
+
+.rotateShip0 {
+  transform: rotate(0deg);
+  transform-origin: top left;
+}
+
+.rotateShip90 {
+  transform: rotate(90deg);
+  transform-origin: top left;
+  translate: 45px 0;
+}
+
+
+.ship-len-5 { width: calc(45px * 5); }
+.ship-len-4 { width: calc(45px * 4); }
+.ship-len-3 { width: calc(45px * 3); }
+.ship-len-2 { width: calc(45px * 2); }
+
+
+.ship-height-5 { height: calc(45px * 5); }
+.ship-height-4 { height: calc(45px * 4); }
+.ship-height-3 { height: calc(45px * 3); }
+.ship-height-2 { height: calc(45px * 2); }
