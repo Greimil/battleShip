@@ -5,43 +5,23 @@ import Ship from "./classes/ship.js";
 // 🔹 Global State
 // ─────────────────────────────
 let currentOrientation = "horizontal";
-let isDragging = false;
 let game;
 let player;
-let shipDragging;
-let CellsAvilibility;
+let shipDragging = "";
+let CellsAvilibility = false;
 let rotatingship = false;
+const createShipState = () => ({
+    alreadyOnboard: false,
+    prevX: -1,
+    PrevY: -1,
+    prevOrientation: "horizontal",
+});
 let ShipSOnboard = {
-    SHIP_CARRIER_5: {
-        alreadyOnboard: false,
-        prevX: -1,
-        PrevY: -1,
-        prevOrientation: "horizontal",
-    },
-    SHIP_BATTLESHIP_4: {
-        alreadyOnboard: false,
-        prevX: -1,
-        PrevY: -1,
-        prevOrientation: "horizontal",
-    },
-    SHIP_CRUISER_3: {
-        alreadyOnboard: false,
-        prevX: -1,
-        PrevY: -1,
-        prevOrientation: "horizontal",
-    },
-    SHIP_SUBMARINE_3: {
-        alreadyOnboard: false,
-        prevX: -1,
-        PrevY: -1,
-        prevOrientation: "horizontal",
-    },
-    SHIP_DESTROYER_2: {
-        alreadyOnboard: false,
-        prevX: -1,
-        PrevY: -1,
-        prevOrientation: "horizontal",
-    },
+    SHIP_CARRIER_5: createShipState(),
+    SHIP_BATTLESHIP_4: createShipState(),
+    SHIP_CRUISER_3: createShipState(),
+    SHIP_SUBMARINE_3: createShipState(),
+    SHIP_DESTROYER_2: createShipState(),
 };
 // ─────────────────────────────
 // 🔹 HTML Elements
@@ -51,9 +31,8 @@ const gameSection = document.getElementById("gameSection");
 const startGameBtn = document.getElementById("StartGamebtn");
 const ShipsContainers = document.querySelectorAll(".imgWrapper");
 const board = document.getElementById("board");
-const optionsbuttons = document.querySelectorAll(".optionsbutons button");
 const cellContainer = document.createElement("div");
-// ─────────────────────────────\
+// ─────────────────────────────
 // 🔹 Event Listeners Globales
 // ─────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
@@ -61,43 +40,38 @@ document.addEventListener("DOMContentLoaded", () => {
     createCells();
 });
 document.addEventListener("keydown", (e) => {
-    if (e.key === "R" || e.key == "r") {
-        rotatingship = true;
-        currentOrientation =
-            currentOrientation == "horizontal" ? "vertical" : "horizontal";
-        cellContainer.classList.add("rotateCursor");
-        rotatingship = false;
-    }
+    if (e.key.toLowerCase() === "r")
+        toggleOrientation();
 });
-cellContainer.addEventListener("dragstart", (e) => {
-    const target = e.target;
-    const dragEvent = e;
-    if (target.classList.contains("shipInsidegrid") && target.dataset["id"]) {
-        const shipKey = target.dataset["id"];
-        const newSrc = getShipImage(shipKey, currentOrientation);
-        target.src = newSrc;
-        dragEvent.dataTransfer?.setData("text/plain", shipKey);
-    }
-});
-cellContainer.addEventListener("dragend", (e) => {
-    if (rotatingship == false &&
-        cellContainer.classList.contains("rotateCursor")) {
-        cellContainer.classList.remove("rotateCursor");
-    }
-});
+cellContainer.addEventListener("dragstart", (e) => handleGridDragStart(e));
+cellContainer.addEventListener("dragend", () => removeRotateCursor());
 startGameBtn?.addEventListener("click", () => {
     heroSection?.classList.toggle("activeScreen");
     gameSection?.classList.toggle("activeScreen");
-    initGame(); // ← Inicia todo aquí
+    initGame();
 });
 // ─────────────────────────────
-// 🔹 Inicialización del juego (enfoque mixto)
+// 🔹 Inicialización
 // ─────────────────────────────
 function initGame() {
-    const Ships = CreateShips(ShipsContainers);
+    const Ships = createShips(ShipsContainers);
     player = new Player("user", Ships);
     game = new GameBoard(player);
     setupDragEvents();
+}
+// ─────────────────────────────
+// 🔹 Rotación global
+// ─────────────────────────────
+function toggleOrientation() {
+    rotatingship = true;
+    currentOrientation =
+        currentOrientation === "horizontal" ? "vertical" : "horizontal";
+    cellContainer.classList.add("rotateCursor");
+    rotatingship = false;
+}
+function removeRotateCursor() {
+    if (!rotatingship)
+        cellContainer.classList.remove("rotateCursor");
 }
 // ─────────────────────────────
 // 🔹 Configurar eventos de los barcos
@@ -107,57 +81,46 @@ function setupDragEvents() {
         ship.addEventListener("dragstart", (e) => {
             const dragEvent = e;
             const id = dragEvent.currentTarget.id;
-            if (player.Ships.find((ship) => ship.id == id)?.positions.length != 0)
+            const alreadyPlaced = player.Ships.some((ship) => ship.id === id && ship.positions.length !== 0);
+            if (alreadyPlaced)
                 return;
-            isDragging = true;
-            if (dragEvent.dataTransfer) {
-                dragEvent.dataTransfer.setData("text/plain", id);
-                shipDragging = id;
-            }
+            dragEvent.dataTransfer?.setData("text/plain", id);
+            shipDragging = id;
         });
     });
 }
 // ─────────────────────────────
 // 🔹 Creación de barcos
 // ─────────────────────────────
-function CreateShips(ships) {
-    const Ships = [];
-    ships.forEach((ship) => {
-        switch (ship.id) {
-            case "SHIP_CARRIER_5":
-                Ships.push(new Ship("SHIP_CARRIER_5", "Portaaviones", 5));
-                break;
-            case "SHIP_BATTLESHIP_4":
-                Ships.push(new Ship("SHIP_BATTLESHIP_4", "Acorazado", 4));
-                break;
-            case "SHIP_CRUISER_3":
-                Ships.push(new Ship("SHIP_CRUISER_3", "Crucero", 3));
-                break;
-            case "SHIP_SUBMARINE_3":
-                Ships.push(new Ship("SHIP_SUBMARINE_3", "Submarino", 3));
-                break;
-            case "SHIP_DESTROYER_2":
-                Ships.push(new Ship("SHIP_DESTROYER_2", "Destructor", 2));
-                break;
-        }
+function createShips(ships) {
+    const shipData = {
+        SHIP_CARRIER_5: { name: "Portaaviones", length: 5 },
+        SHIP_BATTLESHIP_4: { name: "Acorazado", length: 4 },
+        SHIP_CRUISER_3: { name: "Crucero", length: 3 },
+        SHIP_SUBMARINE_3: { name: "Submarino", length: 3 },
+        SHIP_DESTROYER_2: { name: "Destructor", length: 2 },
+    };
+    return Array.from(ships)
+        .filter((s) => s.id in shipData)
+        .map((s) => {
+        const { name, length } = shipData[s.id];
+        return new Ship(s.id, name, length);
     });
-    return Ships;
 }
 // ─────────────────────────────
 // 🔹 Creación del tablero
 // ─────────────────────────────
 function createCells() {
-    let cell;
     cellContainer.classList.add("cellContainer");
     board?.appendChild(cellContainer);
-    for (let r = 0; r <= 9; r++) {
-        for (let c = 0; c <= 9; c++) {
-            cell = document.createElement("div");
+    for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 10; c++) {
+            const cell = document.createElement("div");
             cell.classList.add("cell");
             cell.id = `${r}-${c}`;
-            cell.setAttribute("data-x", r.toString());
-            cell.setAttribute("data-y", c.toString());
-            cell.addEventListener("dragover", handledragover);
+            cell.dataset.x = r.toString();
+            cell.dataset.y = c.toString();
+            cell.addEventListener("dragover", handleDragOver);
             cell.addEventListener("drop", handleDrop);
             cellContainer.appendChild(cell);
         }
@@ -166,126 +129,96 @@ function createCells() {
 // ─────────────────────────────
 // 🔹 Eventos de Drag & Drop
 // ─────────────────────────────
-function handledragover(e) {
+function handleGridDragStart(e) {
+    const target = e.target;
+    if (!target.classList.contains("shipInsidegrid") || !target.dataset.id)
+        return;
+    const shipKey = target.dataset.id;
+    target.src = getShipImage(shipKey, currentOrientation);
+    e.dataTransfer?.setData("text/plain", shipKey);
+}
+function handleDragOver(e) {
     e.preventDefault();
-    const positions = getCellPosition(e)[0];
-    const x = positions[0];
-    const y = positions[1];
-    const shipLength = Number(shipDragging[shipDragging.length - 1]);
+    const [x, y] = getCellPosition(e);
+    const shipLength = Number(shipDragging.at(-1));
     CellsAvilibility = game.checkAvailability(x, y, shipLength, currentOrientation);
     changeCellColor(CellsAvilibility, shipLength, x, y);
 }
 function handleDrop(e) {
     e.preventDefault();
-    if (!e.dataTransfer)
+    const data = e.dataTransfer?.getData("text/plain");
+    if (!data)
         return;
-    const data = e.dataTransfer.getData("text/plain");
-    const shipKey = data;
-    const positions = getCellPosition(e)[0];
-    const [x, y] = positions;
-    // Longitud del barco a partir del nombre (último número del string)
-    const shipLength = Number(data[data.length - 1]);
-    // Obtener la URL correspondiente a la orientación actual
-    const url = getShipImage(shipKey, currentOrientation);
+    const [x, y] = getCellPosition(e);
+    const shipLength = Number(data.at(-1));
+    const url = getShipImage(data, currentOrientation);
     if (!url)
         return;
-    // Actualizar estado del barco en memoria
-    const ship = ShipSOnboard[shipKey];
-    ship.alreadyOnboard = true;
-    ship.prevX = x;
-    ship.PrevY = y;
-    ship.prevOrientation = currentOrientation;
-    // Colocar el barco en el tablero
-    moveShip(e, shipKey, x, y, shipLength, url);
+    Object.assign(ShipSOnboard[data], {
+        alreadyOnboard: true,
+        prevX: x,
+        PrevY: y,
+        prevOrientation: currentOrientation,
+    });
+    moveShip(e, data, x, y, shipLength, url);
     game.printBoard();
 }
 // ─────────────────────────────
-// 🔹 Utilidades varias
+// 🔹 Utilidades
 // ─────────────────────────────
 function getCellPosition(e) {
-    const positions = [];
-    const target = e.target;
+    const target = e.target.closest(".cell");
     if (!target)
-        return positions;
-    if (target.dataset.x && target.dataset.y) {
-        positions.push([Number(target.dataset.x), Number(target.dataset.y)]);
-        return positions;
-    }
-    const cell = target.closest(".cell");
-    if (cell && cell.dataset.x && cell.dataset.y) {
-        positions.push([Number(cell.dataset.x), Number(cell.dataset.y)]);
-    }
-    return positions;
+        return [-1, -1];
+    return [Number(target.dataset.x), Number(target.dataset.y)];
 }
 function clearHighlights() {
     document
         .querySelectorAll(".highlightSuccesCell, .highlighErrorCell")
         .forEach((el) => el.classList.remove("highlightSuccesCell", "highlighErrorCell"));
 }
-function changeCellColor(availability, shipLength, x, y, placeShip = false) {
+function changeCellColor(available, shipLength, x, y) {
     clearHighlights();
     const dx = currentOrientation === "vertical" ? 1 : 0;
     const dy = currentOrientation === "horizontal" ? 1 : 0;
-    const targets = [];
-    for (let i = 0; i < shipLength; i++) {
-        const nx = x + dx * i;
-        const ny = y + dy * i;
-        const el = document.getElementById(`${nx}-${ny}`);
-        targets.push({ el, nx, ny });
-    }
-    const allExist = targets.every((t) => t.el !== null);
-    const classToAdd = availability && allExist ? "highlightSuccesCell" : "highlighErrorCell";
-    targets.forEach((t) => {
-        if (!t.el)
-            return;
-        t.el.classList.remove("highlightSuccesCell", "highlighErrorCell");
-        t.el.classList.add(classToAdd);
-    });
+    const targets = Array.from({ length: shipLength }, (_, i) => document.getElementById(`${x + dx * i}-${y + dy * i}`));
+    const allExist = targets.every(Boolean);
+    const classToAdd = available && allExist ? "highlightSuccesCell" : "highlighErrorCell";
+    targets.forEach((cell) => cell?.classList.add(classToAdd));
 }
+// ─────────────────────────────
+// 🔹 Mover Barco
+// ─────────────────────────────
 function moveShip(e, shipKey, x, y, shipLength, url) {
     const currentTarget = e.currentTarget;
     if (!currentTarget)
         return;
-    // Obtener la imagen existente del barco
     let shipImg = document.querySelector(`img[data-id="${shipKey}"]`);
-    // Si no existe, crearla
+    const orientationClass = currentOrientation === "vertical"
+        ? `ship-height-${shipLength}`
+        : `ship-len-${shipLength}`;
     if (!shipImg) {
         shipImg = document.createElement("img");
-        shipImg.classList.add("shipInsidegrid", currentOrientation === "vertical"
-            ? `ship-height-${shipLength}`
-            : `ship-len-${shipLength}`);
-        shipImg.dataset.id = shipKey;
-        // Guardar las rutas de imagen para cada orientación
         shipImg.src = url;
-        if (CellsAvilibility) {
+        shipImg.dataset.id = shipKey;
+        shipImg.classList.add("shipInsidegrid", orientationClass);
+        if (CellsAvilibility)
             currentTarget.appendChild(shipImg);
-            CellsAvilibility = false;
-        }
-        ShipSOnboard[shipKey].alreadyOnboard = true;
         game.placeShip(x, y, shipLength, currentOrientation, shipKey);
         clearHighlights();
         return;
     }
-    // Actualizar rotación y fuente según orientación
-    if (shipImg.classList.contains(`ship-len-${shipLength}`) &&
-        currentOrientation == "vertical") {
-        shipImg.classList.remove(`ship-len-${shipLength}`);
-        shipImg.classList.add(`ship-height-${shipLength}`);
-    }
-    if (shipImg.classList.contains(`ship-height-${shipLength}`) &&
-        currentOrientation == "horizontal") {
-        shipImg.classList.remove(`ship-height-${shipLength}`);
-        shipImg.classList.add(`ship-len-${shipLength}`);
-    }
+    shipImg.className = `shipInsidegrid ${orientationClass}`;
     shipImg.src = url;
-    // Reubicar en el nuevo target
     shipImg.remove();
     currentTarget.appendChild(shipImg);
-    // Actualizar lógica del juego
     game.clearCell(shipLength, shipKey);
     game.placeShip(x, y, shipLength, currentOrientation, shipKey);
     clearHighlights();
 }
+// ─────────────────────────────
+// 🔹 Obtener imagen según orientación
+// ─────────────────────────────
 function getShipImage(shipKey, orientation) {
     const shipImages = {
         SHIP_CARRIER_5: {
@@ -309,8 +242,5 @@ function getShipImage(shipKey, orientation) {
             vertical: "./src/assets/topDowView/destructorV.png",
         },
     };
-    const ship = shipImages[shipKey];
-    if (!ship)
-        return "";
-    return orientation === "horizontal" ? ship.horizontal : ship.vertical;
+    return shipImages[shipKey]?.[orientation] ?? "";
 }

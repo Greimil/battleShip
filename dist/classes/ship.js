@@ -1,13 +1,10 @@
 class Ship {
+    id;
+    name;
+    lifes;
+    positions = [];
+    orientation;
     constructor(id, name, lifes) {
-        this.positions = [];
-        this.setPositions = (x, y) => {
-            this.positions.push([x, y]);
-        };
-        this.removePositions = () => {
-            this.positions = [];
-        };
-        this.printShipPosition = () => console.log(this.positions);
         this.id = id;
         this.name = name;
         this.lifes = lifes;
@@ -19,8 +16,15 @@ class Ship {
             this.IsSunk();
         }
     }
+    setPositions = (x, y) => {
+        this.positions.push([x, y]);
+    };
+    removePositions = () => {
+        this.positions = [];
+    };
     IsSunk() {
         return this.lifes == 0;
     }
+    printShipPosition = () => console.log(this.positions);
 }
 export default Ship;

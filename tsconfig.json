@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2020", // Soporta funciones modernas como filter, find, etc.
+    "target": "ES2022", // Soporta funciones modernas como filter, find, etc.
     "module": "ESNext", // Usa módulos ES para import/export
     "outDir": "./dist", // Carpeta de salida para los archivos compilados
     "rootDir": "./src", // Carpeta fuente con tus archivos .ts
