@@ -11,21 +11,29 @@ class Player {
     this.Ships = Ships;
   }
 
-  addShip = (id: string, x: number, y: number) => {
+  addShip = (id: string, x: number, y: number): boolean => {
     const ship = this.Ships.find((s) => s.id === id);
+
+    if (!ship) return false;
+
     if (ship) {
       ship.setPositions(x, y);
-    } 
+    }
+
+    return true;
   };
 
+  removeShip = (id: string): boolean => {
+    const ship = this.Ships.find((s) => s.id === id);
 
-  removeShip = (id: string)=>{
-     const ship = this.Ships.find((s) => s.id === id);
+    if (!ship) return false;
+
     if (ship) {
       ship.removePositions();
-    } 
-  }
+    }
 
+    return true;
+  };
 
   printShips = () => console.log(this.Ships);
 }

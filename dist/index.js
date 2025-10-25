@@ -1,12 +1,16 @@
 import GameBoard from "./classes/GameBoard.js";
+import GameManager from "./classes/GameManger.js";
 import Player from "./classes/player.js";
 import Ship from "./classes/ship.js";
 // ─────────────────────────────
 // 🔹 Global State
 // ─────────────────────────────
 let currentOrientation = "horizontal";
-let game;
+let PlayerGame;
 let player;
+let cpuGame;
+let cpu;
+let gameManager;
 let shipDragging = "";
 let CellsAvilibility = false;
 let rotatingship = false;
@@ -16,7 +20,7 @@ const createShipState = () => ({
     PrevY: -1,
     prevOrientation: "horizontal",
 });
-let ShipSOnboard = {
+let shipSOnboard = {
     SHIP_CARRIER_5: createShipState(),
     SHIP_BATTLESHIP_4: createShipState(),
     SHIP_CRUISER_3: createShipState(),
@@ -29,34 +33,89 @@ let ShipSOnboard = {
 const heroSection = document.getElementById("heroSection");
 const gameSection = document.getElementById("gameSection");
 const startGameBtn = document.getElementById("StartGamebtn");
+const initGameBtn = document.getElementById("ini_game");
 const ShipsContainers = document.querySelectorAll(".imgWrapper");
-const board = document.getElementById("board");
-const cellContainer = document.createElement("div");
+const regular_board = document.getElementById("board");
+const attack_board = document.getElementById("board-attack");
+const cellContainer_reg = document.createElement("div");
+const cellContainer_attack = document.createElement("div");
+const resetgamebtn = document.getElementById("resetGame");
+const toolTip = document.querySelector(".intruccions");
+const mainH2 = document.getElementById("mainH2");
+const screenIndicator = document.getElementById("screenIndicator");
+const logo = document.querySelector(".logo");
+const optionsContainer = document.querySelector(".optionsContainer");
+const btnVolumen = document.querySelector(".btnControl");
+const canyonSound = new Audio("./src/assets/sound/cannonEfect.mp3");
+const bgMusic = new Audio("./src/assets/sound/bgMusic.mp3");
+const vollevels = [0.6, 0.3, 0];
+let currentVol = 0;
+// const cell = document.querySelectorAll("cell")
 // ─────────────────────────────
 // 🔹 Event Listeners Globales
 // ─────────────────────────────
+btnVolumen?.addEventListener("click", () => {
+    currentVol = (currentVol + 1) % vollevels.length;
+    bgMusic.volume = vollevels[currentVol];
+    console.log(bgMusic.volume);
+    if (bgMusic.volume === 0) {
+        btnVolumen.src = "/src/assets/volumenOff.png";
+    }
+    else if (bgMusic.volume < 0.6) {
+        btnVolumen.src = "/src/assets/volumenMid.png";
+    }
+    else {
+        btnVolumen.src = "/src/assets/volumeControl.png";
+    }
+});
+logo?.addEventListener("click", () => {
+    gameSection?.classList.remove("activeScreen");
+    heroSection?.classList.add("activeScreen");
+});
+initGameBtn?.addEventListener("click", (e) => {
+    startgame();
+});
+resetgamebtn?.addEventListener("click", () => {
+    resetGame();
+});
 document.addEventListener("DOMContentLoaded", () => {
     heroSection?.classList.add("activeScreen");
-    createCells();
+    if (regular_board) {
+        createCells(cellContainer_reg, regular_board, "regular");
+    }
+    if (attack_board) {
+        createCells(cellContainer_attack, attack_board, "attack");
+    }
 });
 document.addEventListener("keydown", (e) => {
     if (e.key.toLowerCase() === "r")
         toggleOrientation();
 });
-cellContainer.addEventListener("dragstart", (e) => handleGridDragStart(e));
-cellContainer.addEventListener("dragend", () => removeRotateCursor());
+cellContainer_reg.addEventListener("dragstart", (e) => {
+    handleGridDragStart(e);
+});
+cellContainer_reg.addEventListener("dragend", () => removeRotateCursor());
 startGameBtn?.addEventListener("click", () => {
     heroSection?.classList.toggle("activeScreen");
     gameSection?.classList.toggle("activeScreen");
     initGame();
+    bgMusic.loop = true;
+    bgMusic.volume = 0.3;
+    bgMusic.play();
 });
 // ─────────────────────────────
 // 🔹 Inicialización
 // ─────────────────────────────
 function initGame() {
-    const Ships = createShips(ShipsContainers);
-    player = new Player("user", Ships);
-    game = new GameBoard(player);
+    const shipsPlayer = createShips(ShipsContainers);
+    const shipsCpu = createShips(ShipsContainers);
+    player = new Player("user", shipsPlayer);
+    PlayerGame = new GameBoard(player);
+    cpu = new Player("cpu", shipsCpu);
+    cpuGame = new GameBoard(cpu);
+    cpuGame.placeShipRandomly(shipsCpu);
+    cpuGame.printBoard();
+    gameManager = new GameManager(PlayerGame, cpuGame);
     setupDragEvents();
 }
 // ─────────────────────────────
@@ -66,12 +125,12 @@ function toggleOrientation() {
     rotatingship = true;
     currentOrientation =
         currentOrientation === "horizontal" ? "vertical" : "horizontal";
-    cellContainer.classList.add("rotateCursor");
+    cellContainer_reg.classList.add("rotateCursor");
     rotatingship = false;
 }
 function removeRotateCursor() {
     if (!rotatingship)
-        cellContainer.classList.remove("rotateCursor");
+        cellContainer_reg.classList.remove("rotateCursor");
 }
 // ─────────────────────────────
 // 🔹 Configurar eventos de los barcos
@@ -82,6 +141,7 @@ function setupDragEvents() {
             const dragEvent = e;
             const id = dragEvent.currentTarget.id;
             const alreadyPlaced = player.Ships.some((ship) => ship.id === id && ship.positions.length !== 0);
+            // debugger
             if (alreadyPlaced)
                 return;
             dragEvent.dataTransfer?.setData("text/plain", id);
@@ -110,7 +170,7 @@ function createShips(ships) {
 // ─────────────────────────────
 // 🔹 Creación del tablero
 // ─────────────────────────────
-function createCells() {
+function createCells(cellContainer, board, boardType) {
     cellContainer.classList.add("cellContainer");
     board?.appendChild(cellContainer);
     for (let r = 0; r < 10; r++) {
@@ -120,11 +180,23 @@ function createCells() {
             cell.id = `${r}-${c}`;
             cell.dataset.x = r.toString();
             cell.dataset.y = c.toString();
-            cell.addEventListener("dragover", handleDragOver);
-            cell.addEventListener("drop", handleDrop);
+            if (boardType === "regular") {
+                cell.addEventListener("dragover", handleDragOver);
+                cell.addEventListener("drop", handleDrop);
+            }
+            else {
+                cell.addEventListener("click", (e) => handlePlayerAttack(e));
+            }
             cellContainer.appendChild(cell);
         }
     }
+}
+function handlePlayerAttack(e) {
+    const target = e.target;
+    let x = Number(target.getAttribute("data-x"));
+    let y = Number(target.getAttribute("data-y"));
+    // debugger
+    gameManager.handlePlayerClick(x, y, updateMessages, changeCellStatus);
 }
 // ─────────────────────────────
 // 🔹 Eventos de Drag & Drop
@@ -140,8 +212,8 @@ function handleGridDragStart(e) {
 function handleDragOver(e) {
     e.preventDefault();
     const [x, y] = getCellPosition(e);
-    const shipLength = Number(shipDragging.at(-1));
-    CellsAvilibility = game.checkAvailability(x, y, shipLength, currentOrientation);
+    let shipLength = Number(shipDragging.at(-1));
+    CellsAvilibility = PlayerGame.checkAvailability(x, y, shipLength, currentOrientation);
     changeCellColor(CellsAvilibility, shipLength, x, y);
 }
 function handleDrop(e) {
@@ -154,14 +226,7 @@ function handleDrop(e) {
     const url = getShipImage(data, currentOrientation);
     if (!url)
         return;
-    Object.assign(ShipSOnboard[data], {
-        alreadyOnboard: true,
-        prevX: x,
-        PrevY: y,
-        prevOrientation: currentOrientation,
-    });
     moveShip(e, data, x, y, shipLength, url);
-    game.printBoard();
 }
 // ─────────────────────────────
 // 🔹 Utilidades
@@ -193,27 +258,12 @@ function moveShip(e, shipKey, x, y, shipLength, url) {
     const currentTarget = e.currentTarget;
     if (!currentTarget)
         return;
-    let shipImg = document.querySelector(`img[data-id="${shipKey}"]`);
-    const orientationClass = currentOrientation === "vertical"
-        ? `ship-height-${shipLength}`
-        : `ship-len-${shipLength}`;
-    if (!shipImg) {
-        shipImg = document.createElement("img");
-        shipImg.src = url;
-        shipImg.dataset.id = shipKey;
-        shipImg.classList.add("shipInsidegrid", orientationClass);
-        if (CellsAvilibility)
-            currentTarget.appendChild(shipImg);
-        game.placeShip(x, y, shipLength, currentOrientation, shipKey);
+    const placed = placeShipOnBoard(shipKey, x, y, shipLength, currentOrientation);
+    if (!placed) {
         clearHighlights();
         return;
     }
-    shipImg.className = `shipInsidegrid ${orientationClass}`;
-    shipImg.src = url;
-    shipImg.remove();
-    currentTarget.appendChild(shipImg);
-    game.clearCell(shipLength, shipKey);
-    game.placeShip(x, y, shipLength, currentOrientation, shipKey);
+    updateShipImage(shipKey, url, shipLength, currentOrientation, currentTarget);
     clearHighlights();
 }
 // ─────────────────────────────
@@ -243,4 +293,131 @@ function getShipImage(shipKey, orientation) {
         },
     };
     return shipImages[shipKey]?.[orientation] ?? "";
+}
+function resetGame() {
+    Object.keys(shipSOnboard).forEach((key) => {
+        shipSOnboard[key] = createShipState();
+    });
+    Array.from(cellContainer_reg.children).forEach((cell) => {
+        Array.from(cell.children).forEach((child) => cell.removeChild(child));
+    });
+    PlayerGame.resetGame();
+}
+function placeShipOnBoard(shipKey, x, y, shipLength, orientation) {
+    const placed = PlayerGame.placeShip(x, y, shipLength, orientation, shipKey);
+    if (shipSOnboard[shipKey].alreadyOnboard == true && placed) {
+        PlayerGame.clearCell(shipLength, shipKey);
+    }
+    if (placed) {
+        Object.assign(shipSOnboard[shipKey], {
+            alreadyOnboard: true,
+            prevX: x,
+            PrevY: y,
+            prevOrientation: currentOrientation,
+        });
+    }
+    return placed;
+}
+function updateShipImage(shipKey, url, shipLength, orientation, targetCell) {
+    let shipImg = document.querySelector(`img[data-id="${shipKey}"]`);
+    const orientationClass = orientation === "vertical"
+        ? `ship-height-${shipLength}`
+        : `ship-len-${shipLength}`;
+    if (!shipImg) {
+        shipImg = document.createElement("img");
+        shipImg.dataset.id = shipKey;
+        shipImg.classList.add("shipInsidegrid", orientationClass);
+        shipImg.src = url;
+        targetCell.appendChild(shipImg);
+        return;
+    }
+    shipImg.className = `shipInsidegrid ${orientationClass}`;
+    shipImg.src = url;
+    shipImg.remove();
+    targetCell.appendChild(shipImg);
+}
+function setupStyles() {
+    const hasShipsPlaced = Object.values(shipSOnboard).some(ship => ship.alreadyOnboard === true);
+    if (!hasShipsPlaced) {
+        if (screenIndicator) {
+            screenIndicator.textContent =
+                "Tienes que agregar los barcos al tablero antes de continuar!";
+        }
+        return;
+    }
+    toolTip?.classList.remove("visible");
+    if (resetgamebtn)
+        resetgamebtn.textContent = "Reiniciar partida";
+    if (attack_board)
+        attack_board.classList.add("board-attackVisible");
+    if (regular_board)
+        regular_board.style.left = "0";
+    if (screenIndicator)
+        screenIndicator.textContent = "Haz click en una celda para atacarla";
+    if (mainH2)
+        mainH2.textContent = "¡Ataca a tu oponente!";
+    if (initGameBtn)
+        initGameBtn.style.display = "none";
+    if (optionsContainer)
+        optionsContainer.style.display = "none";
+}
+function updateMessages(res, isPlayerHuman = false) {
+    if (!screenIndicator)
+        return;
+    const messages = {
+        hit: { text: "¡Buen tiro! Has acertado un barco enemigo.", type: "hit" },
+        miss: { text: "Fallaste el disparo, turno de la CPU.", type: "miss" },
+        already: {
+            text: "Ya habías intentado ese lugar, prueba otro.",
+            type: "already",
+        },
+        win: {
+            text: "🎉 ¡Victoria! Has hundido toda la flota enemiga.",
+            type: "win",
+        },
+        error: { text: "⛔ No es tu turno todavía.", type: "error" },
+        "cpu hit": {
+            text: "💥 La CPU ha impactado uno de tus barcos.",
+            type: "hit",
+        },
+        "cpu miss": { text: "La CPU falló su disparo, es tu turno.", type: "miss" },
+        "cpu win": { text: "💀 La CPU ha ganado la partida.", type: "cpu-win" },
+        "cpu already": {
+            text: "La CPU disparó en una posición repetida.",
+            type: "already",
+        },
+    };
+    const messageObj = messages[res] || {
+        text: "Movimiento no reconocido.",
+        type: "error",
+    };
+    // Fade-out
+    screenIndicator.style.opacity = "0";
+    setTimeout(() => {
+        screenIndicator.textContent = messageObj.text;
+        // Limpiar clases previas
+        screenIndicator.classList.remove("hit", "miss", "win", "cpu-win", "error", "already");
+        // Aplicar clase de color según tipo
+        console.log(messageObj.type);
+        screenIndicator.classList.add(messageObj.type);
+        // Fade-in
+        screenIndicator.style.opacity = "1";
+    }, 500); // fade-out duration
+}
+function changeCellStatus(x, y, hit, boardToChange) {
+    const cell = document.querySelector(`#${boardToChange === "player" ? "board" : "board-attack"} [data-x="${x}"][data-y="${y}"]`);
+    const span = document.createElement("span");
+    span.classList.add("spanCell");
+    canyonSound.play();
+    canyonSound.volume = 1;
+    if (cell) {
+        span.textContent = hit ? "💥" : "•";
+        cell.appendChild(span);
+    }
+    else {
+        console.error("Error Celda no encontrada");
+    }
+}
+function startgame() {
+    setupStyles();
 }

@@ -3,6 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/src/assets/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/src/assets/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/src/assets/favicon/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/site.webmanifest" />
     <title>BattleShip</title>
     <link rel="stylesheet" href="style.css" />
     <link
@@ -13,10 +31,19 @@
   <body>
     <header>
       <nav>
-        <div class="logo">BattleShip</div>
+        <div class="logo">
+          <a href="#heroSection" title="Ir a la sección principal">
+            <img
+              src="/src/assets/logo.png"
+              alt="Logo de BattleShip"
+              srcset=""
+            />
+          </a>
+        </div>
         <ul>
           <li>Instrucciones</li>
           <li>Sobre este Proyecto</li>
+          <li><img  class="btnControl" src="/src/assets/volumeControl.png" alt=""></li>
         </ul>
       </nav>
     </header>
@@ -34,11 +61,11 @@
     </div>
   </section>
 
-  <section id="gameSection" >
+  <section id="gameSection">
     <div class="titles">
-      <h2>Coloca Tus barcos</h2>
+      <h2 id="mainH2">Coloca Tus barcos</h2>
 
-      <p>
+      <p id="screenIndicator">
         Arrasta y coloca tus barcos en el tablero. Haz click en 'Empezar
         partida' cuando estes listo.
       </p>
@@ -46,6 +73,7 @@
 
     <div class="placeSection">
       <div class="tableContainer">
+       
         <div id="board">
           <div class="rowHeader">
             <div>1</div>
@@ -72,7 +100,37 @@
             <div>J</div>
             <div>K</div>
           </div>
-          <p class="intruccions visible" id="rotateHint" > Pulsa [R] para girar el barco</p>
+          <p class="intruccions visible" id="rotateHint">
+            Pulsa [R] para girar el barco
+          </p>
+        </div>
+
+        <div id="board-attack">
+          <div class="rowHeader">
+            <div>1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+            <div>6</div>
+            <div>7</div>
+            <div>8</div>
+            <div>9</div>
+            <div>10</div>
+          </div>
+
+          <div class="colHeader">
+            <div>A</div>
+            <div>B</div>
+            <div>C</div>
+            <div>D</div>
+            <div>F</div>
+            <div>G</div>
+            <div>H</div>
+            <div>I</div>
+            <div>J</div>
+            <div>K</div>
+          </div>
         </div>
       </div>
 
@@ -133,17 +191,11 @@
           </div>
 
           <div class="optionsbutons">
-            <!-- <button>
-              <span class="material-symbols-outlined">
-                rotate_90_degrees_cw
-              </span>
-              Rotar Barco
-            </button> -->
-            <button>
-              <img src="/src/assets/rotate_left.png" alt=""   /> Resetear
+            <button id="resetGame">
+              <img src="/src/assets/rotate_left.png" alt="" /> Resetear
               Posiciones
             </button>
-            <button>Empezar Partida</button>
+            <button id="ini_game">Empezar Partida</button>
           </div>
         </div>
       </div>

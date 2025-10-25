@@ -52,12 +52,20 @@ html {
 
 /* ========================================================================== */
 /* Navigation Styles */
+
+header {
+  z-index: 180;
+  position: relative;
+}
+
 header nav {
   display: flex;
   justify-content: space-between;
   padding: 25px 25px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   height: 80px;
+  align-items: center;
+ 
 }
 
 header nav ul {
@@ -67,6 +75,7 @@ header nav ul {
   list-style: none;
   font-size: 20px;
   cursor: pointer;
+  align-items: center;
 }
 
 header nav ul li {
@@ -77,7 +86,25 @@ header nav ul li {
 .logo {
   font-size: 24px;
   font-weight: bold;
+  width: 50px;
+  height: 50px;
+  /* background-color: red; */
 }
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+
+.btnControl {
+
+  width: 30px;
+  height: 30px;
+
+}
+
 
 /* ========================================================================== */
 /* Hero Section Styles */
@@ -85,7 +112,7 @@ header nav ul li {
   display: flex;
   flex-direction: column;
   height: 100%;
-  pointer-events: none;
+  /* pointer-events: none; */
   position: absolute;
   width: 100%;
   top: 0;
@@ -144,23 +171,27 @@ header nav ul li {
 #gameSection .titles {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 15px;
   flex-direction: column;
   align-items: center;
-  padding: 16px 10px;
+  padding: 24px 10px;
 }
 
 #gameSection .titles p {
+
+  font-size: large;
   color: var(--secundarioText);
 }
 
 .tableContainer {
-  width: 65%;
+  position: relative;
+  width: 100%;
   display: flex;
-  /* flex-direction: column; */
   align-items: center;
-  justify-content: end;
+  justify-content: center;
+  gap: 150px;
 }
+
 
 .intruccions {
   position: absolute;
@@ -178,18 +209,25 @@ header nav ul li {
 }
 
 @keyframes glow {
-  0%, 100% { color: var(--primarioText); }
-  50% { color: var(--secundarioText); }
+  0%,
+  100% {
+    color: var(--primarioText);
+  }
+  50% {
+    color: var(--secundarioText);
+  }
 }
 
 #rotateHint.visible {
   opacity: 1;
 }
 
-
-
 .optionsContainer {
-  width: 35%;
+  width: 20%;
+  height: 100%;
+  left: 0;
+  top: 10px;
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: end;
@@ -199,6 +237,7 @@ header nav ul li {
   height: calc(100% - 109px);
   display: flex;
   width: 100%;
+  flex-direction: row-reverse;
 }
 
 /* ========================================================================== */
@@ -206,7 +245,21 @@ header nav ul li {
 
 #board {
   position: relative;
+  
+  /* left: 150px; */
 }
+
+#board-attack {
+  display: none;
+  position: relative;
+   
+}
+
+.board-attackVisible {
+  display: block !important;
+  cursor: url("./src/assets/targetCursor.png") auto, pointer;
+}
+
 
 .cellContainer {
   border: 3px solid var(--acento);
@@ -225,6 +278,10 @@ header nav ul li {
   height: 45px;
   border-collapse: collapse;
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 44px;
 }
 
 .cell:nth-child(10n) {
@@ -243,9 +300,29 @@ header nav ul li {
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
+  max-height: 450px;
 }
 
 #board .colHeader {
+  position: absolute;
+  top: -25px;
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+}
+
+#board-attack .rowHeader {
+  position: absolute;
+  left: -25px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  max-height: 450px;
+}
+
+#board-attack .colHeader {
   position: absolute;
   top: -25px;
   display: flex;
@@ -258,11 +335,13 @@ header nav ul li {
 .fleet {
   max-width: 350px;
   width: 100%;
-  padding: 0px 20px;
+  padding-left: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 25px;
   height: 100%;
+  justify-content: center;
+  /* background: #9999d4; */
 }
 
 .ship {
@@ -336,40 +415,21 @@ header nav ul li {
   background: var(--ActionCTAHover);
 }
 
-/* .shipInsidegrid {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  max-width: 190px;
-  z-index: 10;
-  max-height: 45px;
-} */
-
-
 .shipInsidegrid {
   position: absolute;
   top: 0;
   left: 0;
-  height: 45px; /* una celda */
+  height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
- 
-   height: 100%;
+
+  height: 100%;
   width: 100%;
-  object-fit: contain; /* o cover si prefieres que llene completamente */
+  object-fit: contain;
   display: block;
 }
-
-/* Si quieres que se escale automáticamente según el número de celdas */
-.shipInsidegrid img {
- 
-}
-
-
 
 /* ========================================================================== */
 /* Ocean and Wave Animation Styles */
@@ -438,20 +498,6 @@ header nav ul li {
   background-color: var(--error) !important;
 }
 
-/* 
-.rotateShip90{
-  transform: rotate(90deg);
-  transform-origin: top left;
-  left: 45px;
-
-}
-
-.rotateShip0 {
-  transform-origin: top left;
-  rotate: 0deg;
-} */
-
-
 .rotateShip0 {
   transform: rotate(0deg);
   transform-origin: top left;
@@ -460,17 +506,89 @@ header nav ul li {
 .rotateShip90 {
   transform: rotate(90deg);
   transform-origin: top left;
-  translate: 45px 0;
+  translate: 55px 0;
+}
+
+.ship-len-5 {
+  width: calc(45px * 5);
+  max-height: 40px;
+}
+.ship-len-4 {
+  width: calc(45px * 4);
+  max-height: 40px;
+
+}
+.ship-len-3 {
+  width: calc(45px * 3);
+  max-height: 40px;
+}
+.ship-len-2 {
+  width: calc(45px * 2);
+  max-height: 40px;
+}
+
+.ship-height-5 {
+  height: calc(45px * 5);
+  max-width: 40px;
+}
+.ship-height-4 {
+  height: calc(45px * 4);
+   max-width: 40px;
+}
+.ship-height-3 {
+  height: calc(45px * 3);
+   max-width: 40px;
+}
+.ship-height-2 {
+  height: calc(45px * 2);
+
+}
+
+#screenIndicator {
+  transition: opacity 0.5s ease, color 0.5s ease;
+  opacity: 1;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* Colores según tipo de mensaje */
+.hit {
+  color: #00ff88; /* verde */
+}
+
+.miss {
+  color: #ffaa33; /* naranja */
+}
+
+.win {
+  color: #00aaff; /* azul */
+}
+
+.cpu-win {
+  color: #ff3333; /* rojo */
+}
+
+.error {
+  color: #ffffff; /* blanco */
+}
+
+.already {
+  color: #ffff00; /* amarillo */
+}
+
+.cellHit {
+  background-color: #00ff88 !important;
+}
+
+.cellMiss {
+  background-color: #95a5a6;
 }
 
 
-.ship-len-5 { width: calc(45px * 5); }
-.ship-len-4 { width: calc(45px * 4); }
-.ship-len-3 { width: calc(45px * 3); }
-.ship-len-2 { width: calc(45px * 2); }
+.spanCell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+}
 
-
-.ship-height-5 { height: calc(45px * 5); }
-.ship-height-4 { height: calc(45px * 4); }
-.ship-height-3 { height: calc(45px * 3); }
-.ship-height-2 { height: calc(45px * 2); }
