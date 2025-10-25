@@ -59,13 +59,13 @@ btnVolumen?.addEventListener("click", () => {
     bgMusic.volume = vollevels[currentVol];
     console.log(bgMusic.volume);
     if (bgMusic.volume === 0) {
-        btnVolumen.src = "/src/assets/volumenOff.png";
+        btnVolumen.src = "./src/assets/volumenOff.png";
     }
     else if (bgMusic.volume < 0.6) {
-        btnVolumen.src = "/src/assets/volumenMid.png";
+        btnVolumen.src = "./src/assets/volumenMid.png";
     }
     else {
-        btnVolumen.src = "/src/assets/volumeControl.png";
+        btnVolumen.src = "./src/assets/volumeControl.png";
     }
 });
 logo?.addEventListener("click", () => {
