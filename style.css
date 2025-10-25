@@ -442,7 +442,7 @@ header nav ul li {
 }
 
 .wave {
-  background: url("/src/assets/wave.svg") repeat-x;
+  background: url("./src/assets/wave.svg") repeat-x;
   position: absolute;
   top: -180px;
   width: 6400px;
